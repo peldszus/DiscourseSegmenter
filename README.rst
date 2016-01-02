@@ -46,7 +46,7 @@ repository by executing:
 
 .. code-block:: shell
 
-    git clone git@github.com:WladimirSidorenko/DiscourseSegmenter.git
+    git clone git@github.com:discourse-lab/DiscourseSegmenter.git
     pip install -r DiscourseSegmenter/requirements.txt DiscourseSegmenter/ --user
 
 Usage

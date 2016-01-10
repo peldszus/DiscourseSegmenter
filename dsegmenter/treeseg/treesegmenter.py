@@ -66,17 +66,15 @@ class TreeSegmenter(object):
             raise RuntimeError("Invalid tree type specified for tree segmenter:\
  '{:s}'".format(a_type))
 
-    def _dg_segment(self, a_tree, a_ret = [], a_predict = None, \
-                    a_head2pos = {}, a_root_idx = 0, a_children = [], \
+    def _dg_segment(self, a_tree, a_predict = None, \
+                    a_root_idx = 0, a_children = [], \
                     a_word_access = lambda x:x, a_strategy = GREEDY):
         """
         Method for extracting discourse segments from dependency parse trees.
 
         @param a_tree - parse tree which should be processed (with interface
                         compatible with nltk.parse.dependencygraph)
-        @param a_ret - target list which should be populated with segments
         @param a_predict - prediction function
-        @param a_head2pos - dictionary mapping node labels to their position in tree
         @param a_root_idx - index of the root node in the list of tree nodes
         @param a_children - index of the child nodes
         @param a_word_access - a function for accessing the token string for more complex,
@@ -90,37 +88,38 @@ class TreeSegmenter(object):
 
         @return list of discourse segments
         """
+        a_ret = []
         dec = None             # decision
         if a_predict is None:
             a_predict = self.decfunc
-        # create a dictionary of node positions
         if a_children:
             children = a_children
         elif a_root_idx is None:
             children = []
         else:
             children = [a_root_idx]
-        ipos = -1
-        inode = dseg = None
-        outleaves = []
+
         while children:
             ipos = children.pop(0)
-            inode = a_tree.nodelist[ipos]
-            dec = a_predict(inode, a_tree)
+            inode = a_tree.nodes[ipos]
             word = a_word_access(inode[WORD]) if WORD in inode else ""
+            deps = a_tree.get_dependencies_simple(ipos)
+            dec = a_predict(inode, a_tree)
             if dec is None or dec == NO_MATCH_STRING:
                 # if the node did not start any new segment on its own, then we
                 # add it to the top-most segment in the list
-                if not word is None:
+                if word is not None:
                     a_ret.append((ipos, word))
-                children[:0] = inode.get(DEPS, [])
+                children[:0] = deps
             else:
-                dseg = DiscourseSegment(a_name = dec, \
-                                            a_leaves = self.segment(a_tree, a_predict, [], \
-                                                                        a_head2pos, None, \
-                                                                        a_tree.nodelist[ipos].get(DEPS, []), \
-                                                                        a_word_access, a_strategy))
-                if not word is None:
+                # recurse
+                leaves = self.segment(
+                    a_tree, a_predict=a_predict, a_root_idx=None,
+                    a_children=deps, a_word_access=a_word_access,
+                    a_strategy=a_strategy)
+                dseg = DiscourseSegment(a_name=dec, a_leaves=leaves)
+
+                if word is not None:
                     dseg.insort((ipos, word))
                 # if strategy is GREEDY, only leave nodes which are adjacent to
                 # the root
@@ -129,7 +128,7 @@ class TreeSegmenter(object):
                     a_ret += outleaves
                 a_ret.append((dseg.leaves[0][0] if dseg.leaves else -1, dseg))
         # for GENEROUS strategy, do some post-processing
-        a_ret.sort(key = lambda el: el[0])
+        a_ret.sort(key=lambda el: el[0])
         if a_strategy == GENEROUS:
             a_ret[:] = self._unite_nonadjacent(a_ret)
         return a_ret

@@ -20,16 +20,16 @@ TreeSegmenter - class for converting parse trees to discourse segments
 from .constants import GREEDY, GENEROUS, DEPENDENCY, CONSTITUENCY
 from .discourse_segment import DiscourseSegment
 
-import sys
 
 ##################################################################
 # Constants
-HEAD ="head"
+HEAD = "head"
 DEPS = "deps"
 WORD = "word"
-REL ="rel"
+REL = "rel"
 TAG = "tag"
 NO_MATCH_STRING = "NONE"
+
 
 ##################################################################
 # Class
@@ -77,8 +77,8 @@ class TreeSegmenter(object):
         @param a_predict - prediction function
         @param a_root_idx - index of the root node in the list of tree nodes
         @param a_children - index of the child nodes
-        @param a_word_access - a function for accessing the token string for more complex,
-                         structured tokens
+        @param a_word_access - a function for accessing the token string for
+                         more complex, structured tokens
         @param a_strategy - flag for handling missing and non-projective edges
         (GREEDY means that only adjacent descendants of the root node will
         be put into a segment, if the root initiates one; GENEROUS means that
@@ -144,14 +144,10 @@ class TreeSegmenter(object):
         """
         chnode = None
         chtag = ""
-        iword = a_node.get(WORD, "UNK")
-        itag = a_node.get(TAG, "UNK")
         irel = a_node.get(REL, "UNK")
         ideps = a_node.get(DEPS, [])
         if irel == "TOP":
             return "HS"
-        # elif irel == "--" and itag and itag[0] != '$':
-        #     return "HS"
         else:
             for chpos in ideps:
                 chnode = a_tree.nodelist[chpos]
@@ -256,9 +252,9 @@ class TreeSegmenter(object):
         right_leaves = []
         cur_node = None
         prev_wseg = nxt_wseg = None
-        cur_start = cur_end = nxt_end = wseg_end = -1
-        nxt_start = nxt_end = -1
-        i = 0; max_i = len(a_word_seg)
+        cur_start = cur_end = wseg_end = -1
+        i = 0
+        max_i = len(a_word_seg)
         while i < max_i:
             cur_start, cur_node = a_word_seg[i]
             i += 1

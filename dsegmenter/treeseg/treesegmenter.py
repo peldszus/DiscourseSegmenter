@@ -19,15 +19,10 @@ TreeSegmenter - class for converting parse trees to discourse segments
 # Imports
 from .constants import GREEDY, GENEROUS, DEPENDENCY, CONSTITUENCY
 from .discourse_segment import DiscourseSegment
-
+from ..mateseg.dependency_graph import WORD, REL, DEPS, TAG
 
 ##################################################################
 # Constants
-HEAD = "head"
-DEPS = "deps"
-WORD = "word"
-REL = "rel"
-TAG = "tag"
 NO_MATCH_STRING = "NONE"
 
 

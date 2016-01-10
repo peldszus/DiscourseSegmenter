@@ -23,11 +23,11 @@ from sklearn.svm import LinearSVC
 from sklearn.metrics import precision_recall_fscore_support
 from sklearn.externals import joblib
 
-from .dependency_graph import read_deptree_file
+from .dependency_graph import read_deptree_file, HEAD, WORD, REL, TAG
 from .segmentation_tree import read_segtree_file, generate_subtrees_from_forest
 from ..treeseg import (TreeSegmenter, DiscourseSegment, DEPENDENCY,
                        DEFAULT_SEGMENT)
-from ..treeseg.treesegmenter import HEAD, WORD, REL, TAG, NO_MATCH_STRING
+from ..treeseg.treesegmenter import NO_MATCH_STRING
 from ..treeseg.constants import GREEDY
 from ..bparseg.align import nw_align
 

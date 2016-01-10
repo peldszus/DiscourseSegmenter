@@ -15,7 +15,14 @@ from nltk.parse.dependencygraph import DependencyGraph as NLTKDependencyGraph
 # DEPENDENCY GRAPH HELPERS
 ##############################################################################
 
+HEAD = "head"
+DEPS = "deps"
+WORD = "word"
+REL = "rel"
+TAG = "tag"
+ADDRESS = "address"
 
+TOP_TAG_LABEL = 'TOP'
 TOP_RELATION_LABEL = 'ROOT'
 '''The label of relations to the root node in the mate dep. parser output.'''
 

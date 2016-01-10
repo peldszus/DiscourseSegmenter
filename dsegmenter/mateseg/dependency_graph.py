@@ -32,13 +32,13 @@ class DependencyGraph(NLTKDependencyGraph):
     def words(self):
         '''yields all words except the implicit root node in linear order'''
         for address, node in sorted(self.nodes.items()):
-            if node['tag'] != 'TOP':
-                yield node['word']
+            if node[TAG] != TOP_TAG_LABEL:
+                yield node[WORD]
 
     def subgraphs(self, exclude_root=False):
         '''yields all nodes in linear order'''
         for address, node in sorted(self.nodes.items()):
-            if exclude_root and node['tag'] == 'TOP':
+            if exclude_root and node[TAG] == TOP_TAG_LABEL:
                 continue
             else:
                 yield node
@@ -46,7 +46,7 @@ class DependencyGraph(NLTKDependencyGraph):
     def get_dependencies_simple(self, address):
         '''returns a sorted list of the addresses of all dependencies of the
            node at the specified address'''
-        deps_dict = self.nodes[address].get('deps', {})
+        deps_dict = self.nodes[address].get(DEPS, {})
         return sorted([e for l in deps_dict.values() for e in l])
 
     def address_span(self, start_address):
@@ -57,7 +57,7 @@ class DependencyGraph(NLTKDependencyGraph):
         while len(worklist) != 0:
             address = worklist.pop(0)
             addresses.append(address)
-            for _rel, deps in self.nodes[address]['deps'].items():
+            for _rel, deps in self.nodes[address][DEPS].items():
                 worklist.extend(deps)
         return sorted(addresses)
 
@@ -66,7 +66,7 @@ class DependencyGraph(NLTKDependencyGraph):
            dependency graph in correct linear order, except for the root node
         '''
         addresses = self.address_span(start_address)
-        return [self.nodes[address]['word']
+        return [self.nodes[address][WORD]
                 for address in sorted(addresses) if address != 0]
 
     def is_valid_parse_tree(self):
@@ -108,7 +108,7 @@ def transform_line(line):
         # to the root, but also for punctuations. We thus translate the
         # relation label to 'ROOT'.
         if f[9] == '0':
-            f[11] = 'ROOT'
+            f[11] = TOP_RELATION_LABEL
         return '\t'.join([f[0], token, f[3], f[5], f[5], f[7], f[9], f[11],
                           '_', '_'])
 
@@ -119,7 +119,7 @@ def number_tokens_of_dependency_graphs(list_of_dependency_graphs):
     deptree_leaf_counter = 0
     for depgraph in list_of_dependency_graphs:
         for node in depgraph.subgraphs(exclude_root=True):
-            node['word'] = (deptree_leaf_counter, node['word'])
+            node[WORD] = (deptree_leaf_counter, node[WORD])
             deptree_leaf_counter += 1
     return list_of_dependency_graphs
 

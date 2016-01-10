@@ -23,7 +23,7 @@ from sklearn.svm import LinearSVC
 from sklearn.metrics import precision_recall_fscore_support
 from sklearn.externals import joblib
 
-from .dependency_graph import read_deptree_file, HEAD, WORD, REL, TAG
+from .dependency_graph import read_deptree_file, HEAD, WORD, REL, TAG, ADDRESS
 from .segmentation_tree import read_segtree_file, generate_subtrees_from_forest
 from ..treeseg import (TreeSegmenter, DiscourseSegment, DEPENDENCY,
                        DEFAULT_SEGMENT)
@@ -41,7 +41,7 @@ def gen_features_for_segment(dep_graph, trg_adr):
     ''' ugly feature extraction code  ;) '''
 
     nodes = list(dep_graph.subgraphs(exclude_root=False))
-    nl = {node['address']: node for node in nodes}
+    nl = {node[ADDRESS]: node for node in nodes}
     assert len(nodes) == len(nl)
 
     if trg_adr >= len(nl):
@@ -125,7 +125,7 @@ def substitution_costs(c1, c2):
 def get_testing_observations(dep_trees, text_id):
     for sentence_index, dep_tree in enumerate(dep_trees):
         for node in dep_tree.subgraphs(exclude_root=True):
-            yield (text_id, sentence_index, node['address'], dep_tree)
+            yield (text_id, sentence_index, node[ADDRESS], dep_tree)
 
 
 def get_observations(seg_trees, dep_trees, text_id):
@@ -133,8 +133,8 @@ def get_observations(seg_trees, dep_trees, text_id):
     items = []
     for sentence_index, dep_tree in enumerate(dep_trees):
         for node in dep_tree.subgraphs(exclude_root=True):
-            tokset = set(dep_tree.token_span(node['address']))
-            items.append((text_id, sentence_index, node['address'], dep_tree,
+            tokset = set(dep_tree.token_span(node[ADDRESS]))
+            items.append((text_id, sentence_index, node[ADDRESS], dep_tree,
                           tokset))
 
     # match tokenization first
@@ -199,9 +199,9 @@ def _cnt_stat(a_gold_segs, a_pred_segs):
 def decision_function(node, tree, predictions=None, items=None, text=None,
                       sentence=None):
     '''decision function for the tree segmenter'''
-    index = items.index((text, sentence, node['address']))
+    index = items.index((text, sentence, node[ADDRESS]))
     pred = predictions[index]
-    if pred == NO_MATCH_STRING and 'head' in node and node['head'] == 0:
+    if pred == NO_MATCH_STRING and HEAD in node and node[HEAD] == 0:
         # The classifier did not recognize sentence top as a segment, so we
         # enforce a labelling with the default segment type.
         return DEFAULT_SEGMENT
@@ -222,7 +222,7 @@ def predict_segments_from_vector(parses, predictions, items, text):
             segments = segmenter.segment(
                 dep_graph, a_predict=dec_func,
                 a_word_access=word_access, a_strategy=GREEDY,
-                a_root_idx=dep_graph.root['address'])
+                a_root_idx=dep_graph.root[ADDRESS])
         else:
             # make a simple sentence segment for invalid parse trees
             leaves = [(i, word) for i, (_, word) in

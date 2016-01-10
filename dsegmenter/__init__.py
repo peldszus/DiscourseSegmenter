@@ -11,6 +11,7 @@ Attributes:
   treeseg (module): auxiliary segmenter routines used by syntax-driven segmenters
   bparseg (module): machine-learning discourse segmenter for BitPar constituency trees
   mateseg (module): machine-learning discourse segmenter for Mate dependency graphs
+  evaluation (module): metrics for evaluating discourse segmentation
   __all__ (List[str]): list of sub-modules exported by this package
   __author__ (str): package's author
   __email__ (str): email of package's author
@@ -27,7 +28,7 @@ Attributes:
 ##################################################################
 # Variables and Constants
 __name__ = "dsegmenter"
-__all__ = ["edseg", "bparseg", "mateseg", "treeseg"]
+__all__ = ["edseg", "bparseg", "mateseg", "treeseg", "evaluation"]
 __author__ = "Uladzimir Sidarenka"
 __email__ = "sidarenk at uni dash potsdam dot de"
 __version__ = "0.0.1"

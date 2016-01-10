@@ -9,6 +9,7 @@ Discourse Segmenter
 
 A collection of various discourse segmenters (with pre-trained models for German texts).
 
+
 Description
 ===========
 
@@ -40,6 +41,7 @@ This python module currently comprises three discourse segmenters:
 
 *Since the current model is a serialized file and, therefore, likely  to be incompatible with future releases of `numpy`, we will probably  remove the model files from future versions of this package,  including source data instead and performing training during the  installation.*
 
+
 Installation
 ============
 
@@ -56,6 +58,7 @@ repository by executing:
 
     git clone git@github.com:discourse-lab/DiscourseSegmenter.git
     pip install -r DiscourseSegmenter/requirements.txt DiscourseSegmenter/ --user
+
 
 Usage
 =====
@@ -79,6 +82,25 @@ or, alternatively, also use the delivered front-end script
 Note that this script requires two mandatory arguments: the type of
 the segmenter to use (`bparseg` in the above case) and the operation
 to perform (which are specific to each segmenter).
+
+
+Evaluation
+==========
+
+Intrinsic evaluation scores of the machine learning models on the predicted 
+vectors will be printed when training and evaluating a segmentation model.
+
+Extrinsic evaluation scores on the predicted segmentation trees can be 
+calculated with the evaluation script.
+
+.. code-block:: shell
+
+    python -m dsegmenter.evaluation.evaluation {FOLDER:TRUE} {FOLDER:PRED}
+
+Note, that the script internally calls the DKpro agreement library, which 
+requires Java 8.
+
+
 
 .. _`Bitpar`: http://www.cis.uni-muenchen.de/~schmid/tools/BitPar/
 .. _`Mate`: http://code.google.com/p/mate-tools/

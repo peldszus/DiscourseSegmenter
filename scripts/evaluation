@@ -35,11 +35,11 @@ import string
 from nltk.tree import Tree
 from nltk import ConfusionMatrix
 
-from .align import align_tokenized_tree, AlignmentError
-from .metrics import (metric_pk, metric_windiff, metric_pi_bed, metric_f1,
-                      metric_lf1, metric_alpha_unit, metric_alpha_unit_untyped,
-                      metric_kappa, avg, sigma)
-from .segmentation import get_confusions
+from dsegmenter.evaluation.align import align_tokenized_tree, AlignmentError
+from dsegmenter.evaluation.metrics import (
+    metric_pk, metric_windiff, metric_pi_bed, metric_f1, metric_lf1,
+    metric_alpha_unit, metric_alpha_unit_untyped, metric_kappa, avg, sigma)
+from dsegmenter.evaluation.segmentation import get_confusions
 
 
 BAD_CHAR_RE = re.compile('[_]')

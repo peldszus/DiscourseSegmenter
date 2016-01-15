@@ -97,7 +97,7 @@ calculated with the evaluation script.
 
     evaluation {FOLDER:TRUE} {FOLDER:PRED}
 
-Note, that the script internally calls the DKpro agreement library, which 
+Note, that the script internally calls the `DKpro agreement library`, which 
 requires Java 8.
 
 
@@ -107,3 +107,4 @@ requires Java 8.
 .. _`PCC`: http://www.lrec-conf.org/proceedings/lrec2014/pdf/579_Paper.pdf
 .. _`here`: https://github.com/discourse-lab/DiscourseSegmenter/blob/master/scripts/discourse_segmenter
 .. _`submodule's file`: https://github.com/discourse-lab/DiscourseSegmenter/blob/master/dsegmenter/edseg/clause_segmentation.py
+.. _`DKpro agreement library`: https://dkpro.github.io/dkpro-statistics/

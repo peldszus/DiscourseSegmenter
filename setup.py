@@ -24,7 +24,7 @@ setup(
     author="Wladimir Sidorenko (Uladzimir Sidarenka)",
     author_email="sidarenk@uni-potsdam.de",
     license="MIT",
-    url="https://github.com/WladimirSidorenko/DiscourseSegmenter",
+    url="https://github.com/discourse-lab/DiscourseSegmenter",
     include_package_data=True,
     packages=["dsegmenter", "dsegmenter.bparseg", "dsegmenter.edseg",
               "dsegmenter.treeseg", "dsegmenter.mateseg",

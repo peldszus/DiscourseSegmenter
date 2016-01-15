@@ -95,7 +95,7 @@ calculated with the evaluation script.
 
 .. code-block:: shell
 
-    python -m dsegmenter.evaluation.evaluation {FOLDER:TRUE} {FOLDER:PRED}
+    evaluation {FOLDER:TRUE} {FOLDER:PRED}
 
 Note, that the script internally calls the DKpro agreement library, which 
 requires Java 8.

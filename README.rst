@@ -97,7 +97,7 @@ calculated with the evaluation script.
 
     evaluation {FOLDER:TRUE} {FOLDER:PRED}
 
-Note, that the script internally calls the `DKpro agreement library`, which 
+Note, that the script internally calls the `DKpro agreement library`_, which 
 requires Java 8.
 
 

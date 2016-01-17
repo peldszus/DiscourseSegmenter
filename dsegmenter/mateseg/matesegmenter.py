@@ -359,35 +359,20 @@ def test(dep, model_file, out_folder):
     print "Loading model..."
     pipeline = joblib.load(model_file)
 
-    # extract all features
-    print "Extracting features from all texts..."
-    texts = np.array(sorted(dep.keys()))
-
-    all_observations = list(chain.from_iterable([
-        get_testing_observations(dep[text], text) for text in texts]))
-    all_X = {}
-    items_per_text = defaultdict(list)
-    for text_id, sentence_index, address, dep_tree in all_observations:
-        all_X[(text_id, sentence_index, address)] = gen_features_for_segment(
-            dep_tree, address)
-        items_per_text[text_id].append((text_id, sentence_index, address))
-
-    # predict
-    print "Predicting..."
-    test_items = list(chain.from_iterable([items_per_text[text]
-                      for text in texts]))
-    test_X = [all_X[item] for item in test_items]
-    pred_y = pipeline.predict(test_X)
-
-    # send predicted test set to tree segmenter
-    print "  writing predictions as bracket tree..."
-    for text in texts:
+    for text in sorted(dep.keys()):
+        print text
+        observations = get_testing_observations(dep[text], text)
+        all_X = {}
+        test_items = []
+        for text_id, sentence_index, address, dep_tree in observations:
+            all_X[(text_id, sentence_index, address)] = gen_features_for_segment(dep_tree, address)
+            test_items.append((text_id, sentence_index, address))
+        test_X = [all_X[item] for item in test_items]
+        pred_y = pipeline.predict(test_X)
         discourse_tree = predict_segments_from_vector(
             dep[text], pred_y, test_items, text)
-        print text
         with open(out_folder + '/' + text + '.tree', 'w') as fout:
             fout.write(str(discourse_tree))
-
     print "Done."
 
 

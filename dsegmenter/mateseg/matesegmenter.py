@@ -245,13 +245,39 @@ def predict_segments_from_vector(parses, predictions, items, text):
     return DiscourseSegment(a_name='TEXT', a_leaves=all_segments)
 
 
+def load_corpus_folder(folder_path, file_suffix='.suffix',
+                       file_type_desc='corpus', reader_func=None):
+    print 'Finding {} files...'.format(file_type_desc),
+    files = sorted([f for f in os.listdir(folder_path)
+                    if f.endswith(file_suffix)])
+    print 'found %d.' % len(files)
+    texts = set([fn[:-len(file_suffix)] for fn in files])
+    corpus = {
+        text: reader_func(os.path.join(folder_path, text + file_suffix))
+        for text in texts
+    }
+    return corpus
+
+
+def load_dep_folder(folder_path, file_suffix_dep='.parsed.conll'):
+    return load_corpus_folder(
+        folder_path, file_suffix=file_suffix_dep,
+        file_type_desc='dependency parse', reader_func=read_deptree_file)
+
+
+def load_seg_folder(folder_path, file_suffix_seg='.tree'):
+    return load_corpus_folder(
+        folder_path, file_suffix=file_suffix_seg,
+        file_type_desc='discourse segmentation', reader_func=read_segtree_file)
+
+
 def main():
     # initialize argument parser
     aparser = argparse.ArgumentParser(
         description=("A discourse segmentation model to be trained and ",
                      "tested on dependency parses."))
     aparser.add_argument(
-        "mode", help="mode", choices=['eval', 'train', 'test'])
+        "mode", help="mode", choices=['eval', 'train', 'segment'])
     aparser.add_argument(
         "in_seg", help=("input folder for segmentation files ",
                         "(will be ignored in test mode)"))
@@ -263,76 +289,22 @@ def main():
         "--model", help="model to use for prediction", nargs=1)
     args = aparser.parse_args()
 
-    seg_folder = args.in_seg
-    dep_folder = args.in_dep
-    out_folder = args.out_folder
-    file_suffix_seg = '.tree'
-    file_suffix_dep = '.parsed.conll'
-
-    mode = args.mode
-
-    if mode in ['eval', 'train']:
-        # find files
-        print 'Finding segmentation files...',
-        seg_files = sorted([f for f in os.listdir(seg_folder)
-                            if f.endswith(file_suffix_seg)])
-        print 'found %d.' % len(seg_files)
-        print 'Finding mate parse files...',
-        dep_files = sorted([f for f in os.listdir(dep_folder)
-                            if f.endswith(file_suffix_dep)])
-        print 'found %d.' % len(dep_files)
-
-        # check text alignment
-        print 'Checking text alignment...',
-        seg_texts = set([fn.split('.')[0] for fn in seg_files])
-        dep_texts = set([fn.split('.')[0] for fn in dep_files])
-        if seg_texts == dep_texts:
-            print 'passed.'
+    if args.mode in ['eval', 'train']:
+        seg_corpus = load_seg_folder(args.in_seg)
+        dep_corpus = load_dep_folder(args.in_dep)
+        ms = MateSegmenter(model=None)
+        if args.mode == 'eval':
+            ms.inefficient_cross_validate(seg_corpus, dep_corpus, args.out_folder)
+        elif args.mode == 'train':
+            ms.train(seg_corpus, dep_corpus, args.out_folder)
+    elif args.mode == 'segment':
+        dep_corpus = load_dep_folder(args.in_dep)
+        if args.model is None or len(args.model) != 1 or args.model[0] == None or args.model[0] == '':
+            print "No model specified, using pretrained model."
+            ms = MateSegmenter()
         else:
-            print 'failed.'
-            print 'Texts in segmentation folder:', ','.join([t for t in sorted(seg_texts)])
-            print 'Texts in dependency folder:', ','.join([t for t in sorted(dep_texts)])
-            sys.exit(-1)
-
-        # initialize base data structures
-        texts = seg_texts
-        seg = {t: [] for t in texts}
-        dep = {t: [] for t in texts}
-
-        # load all files
-        print 'Loading input files...',
-        for text in texts:
-            # load segmentation
-            seg[text] = read_segtree_file(seg_folder + '/' + text + file_suffix_seg)
-            dep[text] = read_deptree_file(dep_folder + '/' + text + file_suffix_dep)
-        print 'done.'
-
-        ms = MateSegmenter()
-        if mode == 'eval':
-            ms.inefficient_cross_validate(seg, dep, out_folder)
-        elif mode == 'train':
-            ms.train(seg, dep, out_folder)
-
-    elif mode == 'test':
-        if len(args.model) != 1 or args.model[0] == None or args.model[0] == '':
-            print "Specify a model to test."
-
-        # find files
-        print 'Finding mate parse files...',
-        dep_files = sorted([f for f in os.listdir(dep_folder)
-                            if f.endswith(file_suffix_dep)])
-        dep_texts = set([fn.rsplit(file_suffix_dep, 1)[0] for fn in dep_files])
-        dep = {t: [] for t in dep_texts}
-        print 'found %d.' % len(dep_files)
-
-        # load all files
-        print 'Loading input files...',
-        for text in dep:
-            dep[text] = read_deptree_file(dep_folder + '/' + text + file_suffix_dep)
-        print 'done.'
-
-        ms = MateSegmenter(model=args.model[0])
-        ms.segment(dep, out_folder)
+            ms = MateSegmenter(model=args.model[0])
+        ms.segment(dep_corpus, args.out_folder)
 
 
 class MateSegmenter(object):
@@ -525,8 +497,9 @@ class MateSegmenter(object):
             print "# F1_{tp,fp} 0. %"
 
     def _update_model(self, model):
-        assert model is not None
-        if isinstance(model, str):
+        if model is None:
+            self.pipeline = MateSegmenter.DEFAULT_PIPELINE
+        elif isinstance(model, str):
             if not os.path.isfile(model) or not os.access(model, os.R_OK):
                 raise RuntimeError("Can't load model from file {:s}".format(model))
             self.pipeline = joblib.load(model)

@@ -284,8 +284,7 @@ class MateSegmenter(object):
     """
 
     #: classifier object: default classification method
-    DEFAULT_CLASSIFIER = LinearSVC(class_weight='auto')
-    # DEFAULT_CLASSIFIER = LinearSVC(C=0.3, multi_class='crammer_singer')
+    DEFAULT_CLASSIFIER = LinearSVC(multi_class='ovr', class_weight='auto')
 
     #:str: path  to default model to use in classification
     DEFAULT_MODEL = os.path.join(os.path.dirname(__file__), "data", "mate.model")

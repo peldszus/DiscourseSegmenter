@@ -75,6 +75,8 @@ class DependencyGraph(NLTKDependencyGraph):
                 for address in sorted(addresses) if address != 0]
 
     def is_valid_parse_tree(self):
+        '''check structural integrity of the parse;
+           for the moment just check for a unique root'''
         root = self.get_dependencies_simple(0)
         if len(root) < 1:
             print "Warning: No root address"
@@ -82,7 +84,6 @@ class DependencyGraph(NLTKDependencyGraph):
         if len(root) > 1:
             print "Warning: More than one root address"
             return False
-        # TODO: Add more constraints
         return True
 
     def length(self):

@@ -21,6 +21,11 @@ WORD = "word"
 REL = "rel"
 TAG = "tag"
 ADDRESS = "address"
+LEMMA = "lemma"
+CTAG = "ctag"
+FEATS = "feats"
+
+STANDARD_FIELDS = [HEAD, DEPS, WORD, REL, TAG, ADDRESS, LEMMA, CTAG, FEATS]
 
 TOP_TAG_LABEL = 'TOP'
 TOP_RELATION_LABEL = 'ROOT'
@@ -79,6 +84,27 @@ class DependencyGraph(NLTKDependencyGraph):
             return False
         # TODO: Add more constraints
         return True
+
+    def length(self):
+        '''returns the length in tokens, i.e. the number of nodes excluding
+           the artifical root'''
+        return len(self.nodes) - 1
+
+    def annotate(self, iterable, field_name):
+        '''annotate the nodes (excluding the artifical root) with an additional
+           non-standard field, the values being provided in an iterable in
+           linear order corresponding to the node order'''
+        assert len(iterable) == self.length()
+        assert field_name not in STANDARD_FIELDS
+        for i, value in enumerate(iterable, 1):
+            self.nodes[i][field_name] = value
+
+    def deannotate(self, field_name):
+        '''remove annotations of an additional non-standard field'''
+        assert field_name not in STANDARD_FIELDS
+        for node in self.nodes.values():
+            if field_name in node:
+                del node[field_name]
 
 
 def transform_conll_data(data):
